@@ -130,18 +130,6 @@ resource "confluent_api_key" "topic-manager-kafka-api-key" {
 
 //set up the topics 
   
-resource "confluent_kafka_topic" "ratings" {
-  count = counfluent_kafka_cluster.basic.count
-  kafka_cluster {
-    id = confluent_kafka_cluster.basic[count.index].id
-  }
-  topic_name    = "ratings"
-  rest_endpoint = confluent_kafka_cluster.basic[count.index].rest_endpoint
-  credentials {
-    key    = confluent_api_key.topic-manager-kafka-api-key[count.index].id
-    secret = confluent_api_key.topic-manager-kafka-api-key[count.index].secret
-  }
-}
   
 resource "confluent_kafka_topic" "ratings" {
   count = counfluent_kafka_cluster.basic.count

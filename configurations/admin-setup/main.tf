@@ -347,7 +347,7 @@ resource "confluent_connector" "ratings_source" {
 
   depends_on = [
     confluent_kafka_acl.application-connector-describe-on-cluster,
-    confluent_kafka_acl.application-connector-write-on-target-topic,
+    confluent_kafka_acl.application-connector-write-on-ratings,
     confluent_kafka_acl.application-connector-create-on-data-preview-topics,
     confluent_kafka_acl.application-connector-write-on-data-preview-topics,
   ]
@@ -377,7 +377,7 @@ resource "confluent_connector" "users_source" {
 
   depends_on = [
     confluent_kafka_acl.application-connector-describe-on-cluster,
-    confluent_kafka_acl.application-connector-write-on-target-topic,
+    confluent_kafka_acl.application-connector-write-on-users,
     confluent_kafka_acl.application-connector-create-on-data-preview-topics,
     confluent_kafka_acl.application-connector-write-on-data-preview-topics,
   ]

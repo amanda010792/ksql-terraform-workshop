@@ -86,7 +86,7 @@ resource "confluent_ksql_cluster" "workshop_ksql_cluster" {
     id = confluent_environment.ksql_workshop_env[floor(count.index/10)].id
   }
   depends_on = [
-    confluent_role_binding.app-ksql-kafka-cluster-admin[count.index]
+    confluent_role_binding.app-ksql-kafka-cluster-admin
   ]
 }
 
@@ -124,7 +124,7 @@ resource "confluent_api_key" "topic-manager-kafka-api-key" {
   }
 
   depends_on = [
-    confluent_role_binding.topic-manager-kafka-cluster-admin[count.index]
+    confluent_role_binding.topic-manager-kafka-cluster-admin
   ]
 }
 
@@ -196,7 +196,7 @@ resource "confluent_api_key" "connect-manager-kafka-api-key" {
   }
 
   depends_on = [
-    confluent_role_binding.connect-manager-kafka-cluster-admin[count.index]
+    confluent_role_binding.connect-manager-kafka-cluster-admin
   ]
 }
   
@@ -346,10 +346,10 @@ resource "confluent_connector" "ratings_source" {
   }
 
   depends_on = [
-    confluent_kafka_acl.application-connector-describe-on-cluster[count.index],
-    confluent_kafka_acl.application-connector-write-on-target-topic[count.index],
-    confluent_kafka_acl.application-connector-create-on-data-preview-topics[count.index],
-    confluent_kafka_acl.application-connector-write-on-data-preview-topics[count.index],
+    confluent_kafka_acl.application-connector-describe-on-cluster,
+    confluent_kafka_acl.application-connector-write-on-target-topic,
+    confluent_kafka_acl.application-connector-create-on-data-preview-topics,
+    confluent_kafka_acl.application-connector-write-on-data-preview-topics,
   ]
 }
 
@@ -376,9 +376,9 @@ resource "confluent_connector" "users_source" {
   }
 
   depends_on = [
-    confluent_kafka_acl.application-connector-describe-on-cluster[count.index],
-    confluent_kafka_acl.application-connector-write-on-target-topic[count.index],
-    confluent_kafka_acl.application-connector-create-on-data-preview-topics[count.index],
-    confluent_kafka_acl.application-connector-write-on-data-preview-topics[count.index],
+    confluent_kafka_acl.application-connector-describe-on-cluster,
+    confluent_kafka_acl.application-connector-write-on-target-topic,
+    confluent_kafka_acl.application-connector-create-on-data-preview-topics,
+    confluent_kafka_acl.application-connector-write-on-data-preview-topics,
   ]
 }

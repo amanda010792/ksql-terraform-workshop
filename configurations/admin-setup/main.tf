@@ -340,7 +340,7 @@ resource "confluent_connector" "ratings_source" {
     "kafka.auth.mode"          = "SERVICE_ACCOUNT"
     "kafka.service.account.id" = confluent_service_account.application-connector.id
     "kafka.topic"              = confluent_kafka_topic.ratings[count.index].topic_name
-    "output.data.format"       = "JSON_SR"
+    "output.data.format"       = "JSON"
     "quickstart"               = "RATINGS"
     "tasks.max"                = "1"
   }
@@ -370,7 +370,7 @@ resource "confluent_connector" "users_source" {
     "kafka.auth.mode"          = "SERVICE_ACCOUNT"
     "kafka.service.account.id" = confluent_service_account.application-connector.id
     "kafka.topic"              = confluent_kafka_topic.users[count.index].topic_name
-    "output.data.format"       = "JSON_SR"
+    "output.data.format"       = "JSON"
     "quickstart"               = "CLICKSTREAM_USERS"
     "tasks.max"                = "1"
   }

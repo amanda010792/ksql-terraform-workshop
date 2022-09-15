@@ -30,7 +30,7 @@ resource "confluent_kafka_cluster" "basic" {
   basic {}
 
   environment {
-    id = confluent_environment.ksql_workshop_env[count.index]
+    id = confluent_environment.ksql_workshop_env[count.index].id
   }
 
   lifecycle {

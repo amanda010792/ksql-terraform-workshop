@@ -251,7 +251,7 @@ resource "confluent_kafka_acl" "application-connector-write-on-ratings" {
     id = confluent_kafka_cluster.basic[count.index].id
   }
   resource_type = "TOPIC"
-  resource_name = data.confluent_kafka_topic.ratings.topic_name
+  resource_name = confluent_kafka_topic.ratings[count.index].topic_name
   pattern_type  = "LITERAL"
   principal     = "User:${confluent_service_account.application-connector.id}"
   host          = "*"
@@ -270,7 +270,7 @@ resource "confluent_kafka_acl" "application-connector-write-on-users" {
     id = confluent_kafka_cluster.basic[count.index].id
   }
   resource_type = "TOPIC"
-  resource_name = confluent_kafka_topic.users.topic_name
+  resource_name = confluent_kafka_topic.users[count.index].topic_name
   pattern_type  = "LITERAL"
   principal     = "User:${confluent_service_account.application-connector.id}"
   host          = "*"
@@ -295,7 +295,7 @@ resource "confluent_kafka_acl" "application-connector-create-on-data-preview-top
   host          = "*"
   operation     = "CREATE"
   permission    = "ALLOW"
-  rest_endpoint = data.confluent_kafka_cluster.basic[count.index].rest_endpoint
+  rest_endpoint = confluent_kafka_cluster.basic[count.index].rest_endpoint
   credentials {
     key    = confluent_api_key.connect-manager-kafka-api-key[count.index].id
     secret = confluent_api_key.connect-manager-kafka-api-key[count.index].secret

@@ -16,14 +16,14 @@ provider "confluent" {
 
 resource "confluent_environment" "ksql_workshop_env" {
   count = ceil(length(var.user_account_logins)/10)
-  display_name = "ksql_workshop_env.${count.index}"
+  display_name = "ksql_workshop_env_${count.index}"
 }
 
 //spin up clusters (1 per enviornment) 
 
 resource "confluent_kafka_cluster" "basic" {
   count = length(confluent_environment.ksql_workshop_env)
-  display_name = "ksql_workshop_cluster.${count.index}"
+  display_name = "ksql_workshop_cluster_${count.index}"
   availability = "SINGLE_ZONE"
   cloud        = "AWS"
   region       = "us-east-2"
@@ -74,7 +74,7 @@ resource "confluent_role_binding" "app-ksql-kafka-cluster-admin" {
 
 resource "confluent_ksql_cluster" "workshop_ksql_cluster" {
   count=length(var.user_names)
-  display_name = "ksql.${var.user_names[count.index]}"
+  display_name = "ksql_${var.user_names[count.index]}"
   csu          = 1
   kafka_cluster {
     id = confluent_kafka_cluster.basic[floor(count.index/10)].id

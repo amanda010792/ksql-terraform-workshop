@@ -176,7 +176,7 @@ resource "confluent_role_binding" "connect-manager-kafka-cluster-admin" {
 }
 
 resource "confluent_api_key" "connect-manager-kafka-api-key" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   display_name = "connect-manager-kafka-api-key-${count.index}"
   description  = "Kafka API Key that is owned by 'connect-manager' service account"
   owner {

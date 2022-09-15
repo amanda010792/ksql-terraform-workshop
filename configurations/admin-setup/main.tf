@@ -97,14 +97,14 @@ resource "confluent_service_account" "topic-manager" {
 }
 
 resource "confluent_role_binding" "topic-manager-kafka-cluster-admin" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   principal   = "User:${confluent_service_account.topic-manager.id}"
   role_name   = "CloudClusterAdmin"
   crn_pattern = confluent_kafka_cluster.basic[count.index].rbac_crn
 }
 
 resource "confluent_api_key" "topic-manager-kafka-api-key" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   display_name = "topic-manager-kafka-api-key-${count.index}"
   description  = "Kafka API Key that is owned by 'topic-manager' service account"
   owner {
@@ -132,7 +132,7 @@ resource "confluent_api_key" "topic-manager-kafka-api-key" {
   
   
 resource "confluent_kafka_topic" "ratings" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   kafka_cluster {
     id = confluent_kafka_cluster.basic[count.index].id
   }
@@ -146,7 +146,7 @@ resource "confluent_kafka_topic" "ratings" {
 
   
 resource "confluent_kafka_topic" "users" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   kafka_cluster {
     id = confluent_kafka_cluster.basic[count.index].id
   }
@@ -169,7 +169,7 @@ resource "confluent_service_account" "connect-manager" {
   
 
 resource "confluent_role_binding" "connect-manager-kafka-cluster-admin" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   principal   = "User:${confluent_service_account.connect-manager.id}"
   role_name   = "CloudClusterAdmin"
   crn_pattern = confluent_kafka_cluster.basic[count.index].rbac_crn
@@ -206,7 +206,7 @@ resource "confluent_service_account" "application-connector" {
 }
 
 resource "confluent_api_key" "application-connector-kafka-api-key" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   display_name = "application-connector-kafka-api-key-${count.index}"
   description  = "Kafka API Key that is owned by 'application-connector' service account"
   owner {
@@ -227,7 +227,7 @@ resource "confluent_api_key" "application-connector-kafka-api-key" {
 }
 
 resource "confluent_kafka_acl" "application-connector-describe-on-cluster" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   kafka_cluster {
     id = confluent_kafka_cluster.basic[count.index].id
   }
@@ -246,7 +246,7 @@ resource "confluent_kafka_acl" "application-connector-describe-on-cluster" {
 }
 
 resource "confluent_kafka_acl" "application-connector-write-on-ratings" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   kafka_cluster {
     id = confluent_kafka_cluster.basic[count.index].id
   }
@@ -265,7 +265,7 @@ resource "confluent_kafka_acl" "application-connector-write-on-ratings" {
 }
   
 resource "confluent_kafka_acl" "application-connector-write-on-users" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   kafka_cluster {
     id = confluent_kafka_cluster.basic[count.index].id
   }
@@ -284,7 +284,7 @@ resource "confluent_kafka_acl" "application-connector-write-on-users" {
 }
 
 resource "confluent_kafka_acl" "application-connector-create-on-data-preview-topics" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   kafka_cluster {
     id = confluent_kafka_cluster.basic[count.index].id
   }
@@ -303,7 +303,7 @@ resource "confluent_kafka_acl" "application-connector-create-on-data-preview-top
 }
 
 resource "confluent_kafka_acl" "application-connector-write-on-data-preview-topics" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   kafka_cluster {
     id = confluent_kafka_cluster.basic[count.index].id
   }
@@ -324,7 +324,7 @@ resource "confluent_kafka_acl" "application-connector-write-on-data-preview-topi
 //spin up connectors 
   
 resource "confluent_connector" "ratings_source" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   environment {
     id = confluent_environment.ksql_workshop_env[count.index].id
   }
@@ -354,7 +354,7 @@ resource "confluent_connector" "ratings_source" {
 }
 
 resource "confluent_connector" "users_source" {
-  count = length(counfluent_kafka_cluster.basic)
+  count = length(confluent_kafka_cluster.basic)
   environment {
     id = confluent_environment.ksql_workshop_env[count.index].id
   }

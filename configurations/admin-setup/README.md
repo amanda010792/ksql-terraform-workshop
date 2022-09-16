@@ -49,6 +49,13 @@ In the setup of the workshop you will be provisioning the following resources:
 - Two Datagen Source connectors to simulate mock data in the topics you created. 
 - Necessary service accounts, API keys and ACLs. 
 
+Set terraform variables 
+```
+export TF_VAR_confluent_cloud_api_key="<CONFLUENT_CLOUD_API_KEY>"
+export TF_VAR_confluent_cloud_api_secret="<CONFLUENT_CLOUD_API_SECRET>" 
+```
+
+
 Run the script to set up resources (providing the path to the csv file provided by your Confluent Contact with registrations)
 ```
 ./setup.sh <path-to-csv>

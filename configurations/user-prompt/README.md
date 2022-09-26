@@ -40,3 +40,38 @@ You will find your ksqlDB cluster by navigating to the kafka cluster with your u
 - **Performance**    
 - **Settings**     
 - **CLI Instructions**     
+
+### See available kafka topics and data 
+
+Remember we discussed in the presentation that KSQL wowrks with Streams and Tables, and these are just abstractions for working with data in topics ? So the first thing we will do is find what topics we have available to work with on our Kafka cluster - try entering:    
+```
+show topics;
+```
+
+The list of topics you see here is exactly the same as you would see in the 'Topics' section of Cloud Dashboard, except that here we are getting the list via a KSQL command instead of browsing graphically for it.     
+
+We can also investigate some data from those topics before working with them:      
+```
+print 'xxxx' limit 3 
+```
+or
+```
+print 'xxxx' from beginning limit 3;
+```
+
+The topics we will use today are ratings and users.      
+
+The event stream driving this example (the data in the ratings topic) is a simulated stream of events representing the ratings left by users on a mobile app or website, with fields including the device type that they used, the star rating (a score from 1 to 5), and an optional comment associated with the rating.     
+
+Notice that we don’t need to know the format of the data when printing a topic; ksqlDB introspects the data and understands how to deserialize it.     
+To stop the query, press the "stop" button.     
+
+## Getting Started with DDL     
+
+### Create the Ratings data stream 
+
+Register the RATINGS data as a KSQL stream, sourced from the 'ratings' topic.   
+```
+create stream ratings with (kafka_topic='ratings', value_format='avro'); **this doesn't work - we need to set the schema explicitly for now until terraform can use schema registry. 
+```
+

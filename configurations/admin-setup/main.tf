@@ -7,6 +7,11 @@ terraform {
   }
 }
 
+locals {
+  user_names = [for line in split("\n", file("users.txt")): chomp(line)]
+  user_account_logins = [for line in split("\n", file("logins.txt")): chomp(line)]
+}
+
 provider "confluent" {
   cloud_api_key    = var.confluent_cloud_api_key
   cloud_api_secret = var.confluent_cloud_api_secret
@@ -15,7 +20,7 @@ provider "confluent" {
 //spin up environments (1 per every 10 users) 
 
 resource "confluent_environment" "ksql_workshop_env" {
-  count = ceil(length(var.user_account_logins)/10)
+  count = ceil(length(local.user_account_logins)/10)
   display_name = "ksql_workshop_env_${count.index}"
 }
 
@@ -42,15 +47,15 @@ resource "confluent_kafka_cluster" "basic" {
 //first need to pull in all users by email 
 
 data "confluent_user" "workshop_user" {
-  count = length(var.user_account_logins)
-  email = var.user_account_logins[count.index]
+  count = length(local.user_account_logins)
+  email = local.user_account_logins[count.index]
 }
 
 //then make each workshop user a cluster admin for the kafka cluster they are assigned to 
   
 
 resource "confluent_role_binding" "test-role-binding" {
-  count=length(var.user_account_logins)
+  count=length(local.user_account_logins)
   principal   = "User:${data.confluent_user.workshop_user[count.index].id}"
   role_name   = "CloudClusterAdmin"
   crn_pattern = confluent_kafka_cluster.basic[floor(count.index/10)].rbac_crn 
@@ -60,21 +65,21 @@ resource "confluent_role_binding" "test-role-binding" {
 //spin up ksql clusters (1 per user) 
 
 resource "confluent_service_account" "app-ksql" {
-  count=length(var.user_names)
-  display_name = "app-ksql-${var.user_names[count.index]}"
+  count=length(local.user_names)
+  display_name = "app-ksql-${local.user_names[count.index]}"
   description  = "Service account to manage workshop ksqlDB cluster"
 }
 
 resource "confluent_role_binding" "app-ksql-kafka-cluster-admin" {
-  count=length(var.user_names)
+  count=length(local.user_names)
   principal   = "User:${confluent_service_account.app-ksql[count.index].id}"
   role_name   = "CloudClusterAdmin"
   crn_pattern = confluent_kafka_cluster.basic[floor(count.index/10)].rbac_crn
 }
 
 resource "confluent_ksql_cluster" "workshop_ksql_cluster" {
-  count=length(var.user_names)
-  display_name = "ksql_${var.user_names[count.index]}"
+  count=length(local.user_names)
+  display_name = "ksql_${local.user_names[count.index]}"
   csu          = 1
   kafka_cluster {
     id = confluent_kafka_cluster.basic[floor(count.index/10)].id

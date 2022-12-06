@@ -43,7 +43,7 @@ You will find your ksqlDB cluster by navigating to the kafka cluster with your u
 
 ### See available kafka topics and data 
 
-Remember we discussed in the presentation that KSQL wowrks with Streams and Tables, and these are just abstractions for working with data in topics ? So the first thing we will do is find what topics we have available to work with on our Kafka cluster - try entering:    
+Remember we discussed in the presentation that KSQL works with Streams and Tables, and these are just abstractions for working with data in topics ? So the first thing we will do is find what topics we have available to work with on our Kafka cluster - try entering:    
 ```
 show topics;
 ```

@@ -8,3 +8,4 @@ variable "confluent_cloud_api_secret" {
   type        = string
   sensitive   = true
 }
+

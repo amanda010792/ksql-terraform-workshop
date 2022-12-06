@@ -43,6 +43,31 @@ resource "confluent_kafka_cluster" "basic" {
   }
 }
 
+//spin up data governance (1 per environment)
+
+data "confluent_schema_registry_region" "sr_region" {
+  cloud   = "AWS"
+  region  = "us-east-2"
+  package = "ESSENTIALS"
+}
+
+resource "confluent_schema_registry_cluster" "essentials" {
+  count = length(confluent_environment.ksql_workshop_env)
+  package = data.confluent_schema_registry_region.example.package
+
+  environment {
+    id = confluent_environment.ksql_workshop_env[count.index].id
+  }
+
+  region {
+    id = data.confluent_schema_registry_region.sr_region.id
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
 //grant kafka cluster admin access to each user 
 //first need to pull in all users by email 
 
@@ -345,7 +370,7 @@ resource "confluent_connector" "ratings_source" {
     "kafka.auth.mode"          = "SERVICE_ACCOUNT"
     "kafka.service.account.id" = confluent_service_account.application-connector.id
     "kafka.topic"              = confluent_kafka_topic.ratings[count.index].topic_name
-    "output.data.format"       = "JSON"
+    "output.data.format"       = "JSON_SR"
     "quickstart"               = "RATINGS"
     "tasks.max"                = "1"
   }
@@ -375,7 +400,7 @@ resource "confluent_connector" "users_source" {
     "kafka.auth.mode"          = "SERVICE_ACCOUNT"
     "kafka.service.account.id" = confluent_service_account.application-connector.id
     "kafka.topic"              = confluent_kafka_topic.users[count.index].topic_name
-    "output.data.format"       = "JSON"
+    "output.data.format"       = "JSON_SR"
     "quickstart"               = "CLICKSTREAM_USERS"
     "tasks.max"                = "1"
   }

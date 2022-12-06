@@ -8,13 +8,3 @@ variable "confluent_cloud_api_secret" {
   type        = string
   sensitive   = true
 }
-
-variable "user_names" {
-  description = "User names of registrants"
-  type        = list(string)
-}
-
-variable "user_account_logins" {
-  description = "User emails of registrants"
-  type        = list(string)
-}

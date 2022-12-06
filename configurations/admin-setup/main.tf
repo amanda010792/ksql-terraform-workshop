@@ -53,7 +53,7 @@ data "confluent_schema_registry_region" "sr_region" {
 
 resource "confluent_schema_registry_cluster" "essentials" {
   count = length(confluent_environment.ksql_workshop_env)
-  package = data.confluent_schema_registry_region.example.package
+  package = data.confluent_schema_registry_region.sr_region.package
 
   environment {
     id = confluent_environment.ksql_workshop_env[count.index].id

@@ -56,8 +56,9 @@ export TF_VAR_confluent_cloud_api_secret="<CONFLUENT_CLOUD_API_SECRET>"
 ```
 
 
-Run the script to set up resources (providing the path to the csv file provided by your Confluent Contact with registrations)
+Set up resources using terraform
 ```
-./setup.sh <path-to-csv>
+terraform init
+terraform apply
 ```
 

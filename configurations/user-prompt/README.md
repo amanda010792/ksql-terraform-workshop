@@ -72,6 +72,81 @@ To stop the query, press the "stop" button.
 
 Register the RATINGS data as a KSQL stream, sourced from the 'ratings' topic.   
 ```
-create stream ratings with (kafka_topic='ratings', value_format='avro'); **this doesn't work - we need to set the schema explicitly for now until terraform can use schema registry. 
+create stream ratings with (kafka_topic='ratings', value_format='json_sr');
+```
+
+Notice that here we are using the Schema Registry with our json_sr-formatted data to pull in the schema of this stream automatically. If interested, you can compare the schema which ksqlDB has created here against what was registered in the Schema Registry in the Confluent Cloud Dashboard (they will be the same!) If our data were in some other format which can’t be described in the Schema Registry, such as CSV messages, then we would also need to specify each column and it’s datatype in the create statement.     
+
+Check your creation with describe ratings; and then run a couple of select queries. For example:      
+
+```
+select *
+from ratings
+where channel like 'iOS%'
+emit changes;
+```
+
+What happens? Why?     
+
+The emit changes at the end of your select query is basically telling ksqlDB to keep following the topic which underlies your stream. As new records are written into that topic, ksqlDB will read them, filter them through the where clause, and write back to your terminal any events which pass the specified condition. In other words, this query will never end! This is one of the key differences about a streaming database.      
+
+You can also try describe ratings extended; to see more technical information about the data flowing htrough your new stream.     
+
+### Create the Users data stream and table 
+
+Register the USERS data as a KSQL stream, sourced from the 'users' topic.        
+```
+create stream users with (kafka_topic='users', value_format='json_sr');
+```
+
+By default, all Kafka client applications when they start up will consume messages which arrive in their input topics from that moment forwards. Older records in the topic are not consumed. We can control this behavior though by setting a configuration property, called 'auto.offset.reset'. Change auto.offset.reset to 'Earliest' through the UI. If you are using the CLI, you can do this with the command:     
+
+```
+set 'auto.offset.reset' = 'earliest';
+```
+
+Create a ktable based on the users topic.    
+```
+CREATE TABLE users_tbl (
+     user_id INTEGER PRIMARY KEY,
+     username VARCHAR,
+     registered_at BIGINT,
+     first_name VARCHAR,
+     last_name VARCHAR,
+     city VARCHAR,
+     level VARCHAR
+   ) WITH (
+     KAFKA_TOPIC = 'users', 
+     VALUE_FORMAT = 'json_sr'
+   );
+```
+
+View the users table.     
+```
+select * from users_tbl emit changes;
+```
+
+### Identify the Unhappy Customers
+
+Now that we have both our ratings and our user data, we can join them together to find out details about the users who are posting negative reviews, and see if any of them are our valued platinum customers. We start by finding just the low-scoring ratings (play around with the where clause conditions to experiment).     
+
+```
+select * from ratings where stars < 3 and channel like 'iOS%' emit changes limit 5;
+```
+
+Now convert this test query into a persistent one (a persistent query is one which starts with create and continuously writes its' output into a topic in Kafka):    
+
+```
+create stream poor_ratings as select * from ratings where stars < 3 and channel like 'iOS%';
+```
+
+Which of these low-score ratings was posted by an elite customer? To answer this we need to join our users table:     
+```
+create stream vip_poor_ratings as
+select r.user_id, u.first_name, u.last_name, u.level, r.stars
+from poor_ratings r
+left join users_tbl u
+on r.user_id = u.user_id
+where lcase(u.level) = 'platinum';
 ```
 

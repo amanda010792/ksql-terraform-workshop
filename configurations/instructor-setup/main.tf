@@ -34,6 +34,28 @@ resource "confluent_kafka_cluster" "basic" {
   }
 }
 
+data "confluent_schema_registry_region" "sr_region" {
+  cloud   = "AWS"
+  region  = "us-east-2"
+  package = "ESSENTIALS"
+}
+
+resource "confluent_schema_registry_cluster" "essentials" {
+  package = data.confluent_schema_registry_region.sr_region.package
+
+  environment {
+    id = confluent_environment.ksql_workshop_env.id
+  }
+
+  region {
+    id = data.confluent_schema_registry_region.sr_region.id
+  }
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
 # create a service account for ksqldb 
 resource "confluent_service_account" "app-ksql" {
   display_name = "app-ksql-instructor"

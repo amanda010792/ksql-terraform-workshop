@@ -105,21 +105,21 @@ By default, all Kafka client applications when they start up will consume messag
 set 'auto.offset.reset' = 'earliest';
 ```
 
-Create a ktable based on the users topic.    
+Create a stream of the first 15 users.     
 ```
-CREATE TABLE users_tbl (
-     user_id INTEGER PRIMARY KEY,
-     username VARCHAR,
-     registered_at BIGINT,
-     first_name VARCHAR,
-     last_name VARCHAR,
-     city VARCHAR,
-     level VARCHAR
-   ) WITH (
-     KAFKA_TOPIC = 'users', 
-     VALUE_FORMAT = 'json_sr'
-   );
+create stream users_15 as select * from users where user_id<=15;
 ```
+
+Create a ktable based on the first 15 users.    
+
+```
+CREATE TABLE users_tbl AS
+  SELECT user_id, latest_by_offset(first_name) AS first_name, latest_by_offset(last_name) AS last_name, latest_by_offset(level) AS level
+  FROM users_15
+  GROUP BY user_id
+  EMIT CHANGES;
+```
+
 
 View the users table.     
 ```
@@ -140,13 +140,73 @@ Now convert this test query into a persistent one (a persistent query is one whi
 create stream poor_ratings as select * from ratings where stars < 3 and channel like 'iOS%';
 ```
 
-Which of these low-score ratings was posted by an elite customer? To answer this we need to join our users table:     
+How can we see the users who posted a poor rating? To answer this we need to join our users table:     
 ```
-create stream vip_poor_ratings as
+create stream poor_ratings_users as
 select r.user_id, u.first_name, u.last_name, u.level, r.stars
 from poor_ratings r
 left join users_tbl u
-on r.user_id = u.user_id
-where lcase(u.level) = 'platinum';
+on r.user_id = u.user_id;
 ```
+### Using tables as a Materialized Cache
+
+One really interesting way to use ksqlDB is to think of a continuously-updating table as a kind of Materialized View or Cache (it isn’t strictly either, technically speaking, but they are a good analogy here!) For example, we could also use one of our streams of ratings events to populate a table of aggregated, per-user, statistics:     
+
+```
+create table rating_stats as
+select user_id,
+    avg(stars) as avg_rating,
+    collect_list(stars) as ratings,
+    count(*) as num_ratings,
+    max(rowtime) as last_rating_time
+from ratings
+group by user_id;
+```
+
+We can actually query this table in two different ways: 
+- With a never-ending query, using emit changes, which will continuously output any changes in the table data back to our client.     
+- As more of a "point look-up", which will simply give us the current value for a row in the table and then terminate. This should be familiar as it’s how most databases work :-).   
+
+We sometimes refer to these 2 different ways to query as 'push' (the one which keeps sending change data back to us) and 'pull' (the moment-in-time lookup). We can try it both ways with the table we just built, like this:    
+```
+select * from rating_stats where user_id = 1 emit changes;
+select * from rating_stats where user_id = 1;
+```
+See the difference?        
+
+The first one (the emit changes) can be helpful when testing, or as the input to another create stream as… where you want the processing to continue for as long as new data is arriving. The second form (the lookup or 'pull query') can be useful if you have another application which wants to know the current value of something, perhaps in order to display it in a UI or use it in some other calculation. Because you can issue this query over ksqlDB’s REST API it allows you to think of your ksqlDB apps as though they were like special microservices or cache servers, always running in the background, ready to serve up the latest state at any time.     
+
+### Monitoring our Queries
+
+So what’s actually happening under the covers here? Let’s see all our running queries:
+```
+show queries;
+explain <query_id>;  (case sensitive!)
+```
+
+...or you can go to the persistent queries tab in the UI!
+
+### View Consumer Lag for a Query
+
+Navigate to 'Clients' -> 'Consumer Lag' in the CC Dashboard and try to find the one for our join query and click on it.
+
+All the names are prefixed with 'confluent_ksql' plus the ID of the query, as shown in the output of explain queries. What do we see?    
+
+## Extra Credit
+
+Time permitting, let’s explore the following idea:    
+
+which customers are so upset that they post multiple bad ratings in quick succession? Perhaps we want to route those complaints direct to our Customer Care team to do some outreach…   
+
+```
+select first_name, last_name, count(*) as rating_count
+from poor_ratings_users
+window tumbling (size 5 minutes)
+group by first_name, last_name
+having count(*) > 1 emit changes;
+```
+
+This may take a minute or two to return any data as we are now waiting for the random data generator which populates the orginal 'ratings' to produce the needed set of output.    
+
+And of course we could prefix this query with create table very_unhappy_vips as … to continuously record the output.    
 

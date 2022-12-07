@@ -3,6 +3,12 @@
 
 ## Pre-requisites
 
+###### Help customer set up the environment 
+
+Work with your trusted contact at the customer to spin up the environment for the workshop: 
+- Update users.txt and logins.txt to reflect the registration list. This should be their username (ie: agilbert) in users.txt and their login (ie: agilbert@confluent.io) in logins.txt
+- Zip up the admin-setup folder and send to the customer contact
+- On a call with the customer, help them to walk through the admin setup steps listed in the README. 
 
 ###### Login to confluent cloud 
 ```
@@ -62,4 +68,7 @@ Apply terraform changes to deploy instructor environment
 terraform apply
 ```
 
+## Run the lab (to be done live at the workshop)
+
+Follow the steps in the README in the user-prompt folder to complete the lab.    
 

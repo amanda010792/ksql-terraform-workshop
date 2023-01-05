@@ -12,6 +12,10 @@ locals {
   user_account_logins = [for line in split("\n", file("logins.txt")): chomp(line)]
 }
 
+output "logins" {
+  value = length(local.user_account_logins)
+}
+
 provider "confluent" {
   cloud_api_key    = var.confluent_cloud_api_key
   cloud_api_secret = var.confluent_cloud_api_secret
